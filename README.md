@@ -33,6 +33,9 @@ vllm-deck monitor                           → real-time TUI dashboard of vLLM 
 vllm-deck dashboard                         → full TUI combining all of the above
 ```
 
+Every non-TUI subcommand (`check`, `search`, `deploy`) also supports `--json` / `--output json` for
+scripting and composability.
+
 ## Target hardware
 
 Linux + NVIDIA is the target. Two real machines drive development and testing, deliberately chosen to
@@ -85,8 +88,10 @@ project compiling on a Mac with no GPU — see [ADR-0004](docs/adr/0004-cfg-gate
 - Manage running instances: list, stop, restart, logs
 - Config profiles: save and reuse deployment configs (model, GPU, quantization, max-seq-len)
 - Health check: wait for vLLM to be ready before returning
+- **`--dry-run`:** print the exact image, container config, mounts, ports, and GPU flags that would be
+  used — without pulling images or starting a container
 - **aarch64 caveat:** the DGX Spark needs an ARM64 vLLM image (likely an NVIDIA NGC container, not the
-  stock `vllm/vllm-openai`). Resolved at this milestone — see [`docs/roadmap.md`](docs/roadmap.md).
+  stock `vllm/vllm-openai`). Resolved in a pre-M3 spike — see [`docs/roadmap.md`](docs/roadmap.md).
 
 **Crates:** `bollard` (Docker API client), `tokio`, `serde`, `toml` (config files)
 

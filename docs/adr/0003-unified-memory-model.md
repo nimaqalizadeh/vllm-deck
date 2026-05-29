@@ -33,3 +33,15 @@ The memory model carries an explicit `unified_memory: bool`, and the fitness est
 
 `gpu::detect` must report `unified_memory` (NVML can indicate this), and `gpu::vram` must never assume
 a separate VRAM pool. Both Linux test machines exist specifically to exercise both branches.
+
+**NVML caveat — validate before trusting the number.** On a unified GB10, `nvmlDeviceGetMemoryInfo`'s
+`total`/`free` report the GPU's *view* of the shared LPDDR5X pool; that is **not** the same as the
+budget actually allocatable to a model, because the OS and every other process contend for the same
+pool. Treating NVML's `total` as "VRAM you can fill" is exactly the unified-memory bug this ADR exists
+to avoid. Therefore:
+
+- In **M0**, capture the *raw* NVML output on the real Spark (the M0 Verify step compares Spark vs 4060
+  — make examining the actual `total`/`free`/`used` values the explicit goal, not just "it ran").
+- On the unified branch, cross-check the NVML figure against system memory rather than assuming a
+  dedicated VRAM number, and derive the available budget from the shared pool minus what is already in
+  use — do not hardcode or trust a single "total memory" field.
