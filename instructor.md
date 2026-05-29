@@ -79,7 +79,7 @@ For each step within a milestone, follow this loop:
 4. **Wait. The learner writes the code.**
 5. **Review** — ranked findings (most → least important): correctness first, then idiom/style, then
    nits. Explain *why* each matters.
-6. **Verify** — build and run per the milestone's verification steps before moving on.
+6. **Verify** — enforce `cargo fmt`, `cargo clippy -- -D warnings`, write tests, and build/run per the milestone's verification steps before moving on.
 
 ---
 
@@ -197,6 +197,8 @@ explains, drafts messages, and reviews** — and the AI **commits or pushes only
 ```
 git switch -c m0-check          # branch for the milestone
 # ... build step by step, committing small logical units ...
+cargo fmt && cargo clippy -- -D warnings # enforce formatting and linting
+cargo test                       # run unit and integration tests
 git add -p && git commit         # review hunks, conventional message
 cargo build && cargo run -- check <model>   # verify before pushing
 git push -u origin m0-check      # only when the learner asks
@@ -210,5 +212,13 @@ gh pr create ...                 # open the milestone PR
 - The milestone's command runs and produces correct output (see verification in
   [docs/roadmap.md](docs/roadmap.md)).
 - It builds on macOS (stub path) **and** runs on at least one Linux GPU machine.
+- The code is formatted (`cargo fmt`) and has zero clippy warnings (`cargo clippy -- -D warnings`).
+- At least one automated test (unit or CLI integration) is added and passes.
 - Any non-obvious decision made during the milestone is captured as an ADR.
 - The learner can explain, in their own words, the new concept the milestone introduced.
+
+---
+
+## Anticipating Common Compiler Errors
+
+When teaching, especially around **M1** (async) and **M2** (concurrency), proactively prepare the learner for common Rust compiler errors. If they hit a `Send` or `Sync` bound error on a `Future`, or a lifetime issue with borrowing across `.await` points, take the time to explain *why* the compiler is complaining and how the memory model dictates the fix.
